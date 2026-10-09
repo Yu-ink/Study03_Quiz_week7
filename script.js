@@ -73,6 +73,31 @@ function renderQuestion() {
     list.appendChild(button);
   }
   document.getElementById("feedback").hidden = true;
+  document.getElementById("timer").hidden = MODES[state.mode].timeLimit === 0;
+  if (MODES[state.mode].timeLimit > 0) startTimer();
+}
+
+function startTimer() {
+  stopTimer();
+  state.secondsLeft = MODES[state.mode].timeLimit;
+  const timer = document.getElementById("timer");
+  timer.textContent = `${state.secondsLeft}초`;
+  state.timerId = setInterval(() => {
+    state.secondsLeft--;
+    timer.textContent = `${state.secondsLeft}초`;
+    if (state.secondsLeft <= 0) onTimeout();
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(state.timerId);
+  state.timerId = null;
+}
+
+function onTimeout() {
+  if (state.answered) return;
+  state.wrong.push(state.questions[state.index]);
+  revealAnswer(null);
 }
 
 function selectChoice(choice) {
@@ -87,6 +112,7 @@ function selectChoice(choice) {
 function revealAnswer(selected) {
   const q = state.questions[state.index];
   state.answered = true;
+  stopTimer();
   for (const button of document.getElementById("choice-list").children) {
     button.disabled = true;
     if (button.textContent === q.answer) button.classList.add("correct");
@@ -125,7 +151,10 @@ function init() {
     if (state.index === state.questions.length - 1) showResult();
     else nextQuestion();
   });
-  document.getElementById("home-button").addEventListener("click", () => showScreen("start"));
+  document.getElementById("home-button").addEventListener("click", () => {
+    stopTimer();
+    showScreen("start");
+  });
   showScreen("start");
 }
 
