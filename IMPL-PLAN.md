@@ -63,15 +63,15 @@ PRD가 말하지 않았으나 사용자가 겪기 쉬운 경우 5개. 각 줄의
 - 내놓는 것: `const QUESTIONS = [{ id, category, question, choices, answer, explanation, source }]`(PRD 6.1항 형식)
 - id 약자: 한국사 `kh`, 세계지리 `wg`, 과학 `sc`, 예술과 문화 `ac`. 번호는 `01`~`10`
 
-- [ ] Step 1: 한국사 10문항(`kh-01`~`kh-10`)을 씀
+- [x] Step 1: 한국사 10문항(`kh-01`~`kh-10`)을 씀
   - 문항마다 웹 자료로 정답을 대조함. 자료는 공공기관, 백과사전(예: 우리역사넷, 한국민족문화대백과사전)을 우선함
   - `source`는 `"자료명, URL, 2026-10-09"`처럼 확인한 날짜를 넣음
   - 최상급 표현을 쓰면 기준과 시점을 question에 적음(PRD 6.2항)
   - 오답 보기 3개도 정답이 될 수 없는지 확인함
-- [ ] Step 2: 세계지리 10문항(`wg-01`~`wg-10`)을 Step 1 규칙으로 씀
-- [ ] Step 3: 과학 10문항(`sc-01`~`sc-10`)을 Step 1 규칙으로 씀
-- [ ] Step 4: 예술과 문화 10문항(`ac-01`~`ac-10`)을 Step 1 규칙으로 씀
-- [ ] Step 5: Node 문항 검사를 실행함(파일로 남기지 않음, 문항을 고치는 태스크도 이 명령을 씀)
+- [x] Step 2: 세계지리 10문항(`wg-01`~`wg-10`)을 Step 1 규칙으로 씀
+- [x] Step 3: 과학 10문항(`sc-01`~`sc-10`)을 Step 1 규칙으로 씀
+- [x] Step 4: 예술과 문화 10문항(`ac-01`~`ac-10`)을 Step 1 규칙으로 씀
+- [x] Step 5: Node 문항 검사를 실행함(파일로 남기지 않음, 문항을 고치는 태스크도 이 명령을 씀)
 
 ```bash
 node - <<'EOF'
@@ -98,7 +98,7 @@ EOF
 
 기대 출력: `문항 검사 통과: 40문항`
 
-- [ ] Step 6: `questions.js`를 커밋함
+- [x] Step 6: `questions.js`를 커밋함
 
 ### Task 2: 화면 뼈대, 시작 화면, 점검 함수
 
@@ -157,11 +157,11 @@ if (typeof document === "undefined") {
 }
 ```
 
-- [ ] Step 1: index.html에 섹션 3개와 시작 화면 마크업을 씀. 문제 화면과 결과 화면은 빈 요소(진행, 점수, 문항, 보기 목록, 해설, 버튼)만 둠
-- [ ] Step 2: style.css에 클래스 `correct`(정답 보기), `wrong`(고른 오답 보기)의 색과 기본 배치를 씀
-- [ ] Step 3: script.js에 `MODES`, `state`, `showScreen()`, `init()`, `runSelfTests()`와 끝부분 분기를 씀
-- [ ] Step 4: `node script.js`를 실행함. 기대 출력: `PASS 연습 모드 규칙(PRD 5.1항)`, `점검 통과: 1개`
-- [ ] Step 5: `index.html`, `style.css`, `script.js`를 커밋함
+- [x] Step 1: index.html에 섹션 3개와 시작 화면 마크업을 씀. 문제 화면과 결과 화면은 빈 요소(진행, 점수, 문항, 보기 목록, 해설, 버튼)만 둠
+- [x] Step 2: style.css에 클래스 `correct`(정답 보기), `wrong`(고른 오답 보기)의 색과 기본 배치를 씀
+- [x] Step 3: script.js에 `MODES`, `state`, `showScreen()`, `init()`, `runSelfTests()`와 끝부분 분기를 씀
+- [x] Step 4: `node script.js`를 실행함. 기대 출력: `PASS 연습 모드 규칙(PRD 5.1항)`, `점검 통과: 1개`
+- [x] Step 5: `index.html`, `style.css`, `script.js`를 커밋함
 
 ### Task 3: 연습 모드 한 판
 
@@ -180,7 +180,7 @@ if (typeof document === "undefined") {
   - `revealAnswer(selected: string | null) -> void`: `state.answered = true`, 보기를 모두 잠금, 정답 보기에 `correct`, 고른 오답 보기에 `wrong`, 정답 여부(시간 초과면 `selected === null`), 해설, 출처, 마지막 문항이면 [결과 보기] 아니면 [다음]
   - `nextQuestion() -> void`, `showResult() -> void`
 
-- [ ] Step 1: `runSelfTests()`에 점검 4개를 더함
+- [x] Step 1: `runSelfTests()`에 점검 4개를 더함
 
 ```js
 check("shuffle: 원소를 그대로 두고 원본을 바꾸지 않음", () => {
@@ -192,15 +192,15 @@ check("채점: 연습 모드에서 맞히면 1점", () => scoreFor(true, false, 
 check("채점: 틀리면 0점", () => scoreFor(false, false, "practice") === 0);
 ```
 
-- [ ] Step 2: `node script.js`를 실행함. 기대 출력: 새 점검 4개가 FAIL, 끝 줄 `점검 실패: 4개`
-- [ ] Step 3: 위 함수를 script.js에 씀. 카테고리 버튼은 `startCategory`, 결과 화면의 [처음으로]는 `showScreen("start")`에 연결함. 결과 화면에 점수와 "순위표에 기록되지 않음"을 보여 줌
-- [ ] Step 4: `node script.js`를 실행함. 기대 출력: 끝 줄 `점검 통과: 5개`
-- [ ] Step 5: Task 1 Step 5의 Node 문항 검사를 다시 실행함. 기대 출력: `문항 검사 통과: 40문항`
-- [ ] Step 6: `script.js`, `index.html`을 커밋함
+- [x] Step 2: `node script.js`를 실행함. 기대 출력: 새 점검 4개가 FAIL, 끝 줄 `점검 실패: 4개`
+- [x] Step 3: 위 함수를 script.js에 씀. 카테고리 버튼은 `startCategory`, 결과 화면의 [처음으로]는 `showScreen("start")`에 연결함. 결과 화면에 점수와 "순위표에 기록되지 않음"을 보여 줌
+- [x] Step 4: `node script.js`를 실행함. 기대 출력: 끝 줄 `점검 통과: 5개`
+- [x] Step 5: Task 1 Step 5의 Node 문항 검사를 다시 실행함. 기대 출력: `문항 검사 통과: 40문항`
+- [x] Step 6: `script.js`, `index.html`을 커밋함
 
 ### Task 4: 1단계 사용자 확인
 
-- [ ] Step 1: 아래 항목을 사용자에게 드리고 답을 기다림. 열기 명령: `open index.html`. 1-0은 크롬 주소창의 주소 끝에 `?test`를 붙여 열고 `Cmd+Option+J`로 콘솔을 엶
+- [x] Step 1: 아래 항목을 사용자에게 드리고 답을 기다림. 열기 명령: `open index.html`. 1-0은 크롬 주소창의 주소 끝에 `?test`를 붙여 열고 `Cmd+Option+J`로 콘솔을 엶
 
 | 번호 | 확인할 것(PRD 8.1항과 검토 초점) |
 |---|---|
@@ -213,7 +213,7 @@ check("채점: 틀리면 0점", () => scoreFor(false, false, "practice") === 0);
 | 1-6 | 보기를 빠르게 2번 눌러도 점수가 1점만 오름(검토 초점 1) |
 | 1-7 | questions.js의 40문항(정답, 해설, 출처, 최상급 문항의 기준과 시점)을 최종 확인함 |
 
-- [ ] Step 2: 사용자가 지적한 항목을 고치고, 고친 항목만 다시 확인을 요청함. 고친 파일을 커밋함. 모두 통과하면 2단계로 넘어감
+- [x] Step 2: 사용자가 지적한 항목을 고치고, 고친 항목만 다시 확인을 요청함. 고친 파일을 커밋함. 모두 통과하면 2단계로 넘어감
 
 ---
 
