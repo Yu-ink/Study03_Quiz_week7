@@ -154,9 +154,25 @@ function nextQuestion() {
 }
 
 function showResult() {
-  document.getElementById("result-score").textContent = formatScore(state.score, state.questions.length);
+  const score = formatScore(state.score, state.questions.length);
+  const first = document.getElementById("result-first");
+  first.hidden = state.firstScore === null;
+  if (state.firstScore === null) {
+    document.getElementById("result-score").textContent = score;
+  } else {
+    first.textContent = `처음 판 ${formatScore(state.firstScore.score, state.firstScore.total)}`;
+    document.getElementById("result-score").textContent = `다시 푼 점수 ${score}`;
+  }
   document.getElementById("result-note").hidden = MODES[state.mode].leaderboard;
+  document.getElementById("retry-button").hidden = !(MODES[state.mode].retry && state.wrong.length > 0);
   showScreen("result");
+}
+
+function retryWrong() {
+  if (state.firstScore === null) {
+    state.firstScore = { score: state.score, total: state.questions.length };
+  }
+  startRound(state.wrong);
 }
 
 function init() {
@@ -171,6 +187,7 @@ function init() {
     if (state.index === state.questions.length - 1) showResult();
     else nextQuestion();
   });
+  document.getElementById("retry-button").addEventListener("click", retryWrong);
   document.getElementById("home-button").addEventListener("click", () => {
     stopTimer();
     showScreen("start");
