@@ -237,7 +237,7 @@ check("채점: 틀리면 0점", () => scoreFor(false, false, "practice") === 0);
   - `startMode(mode: "practice" | "speed" | "hint") -> void`: `state.mode`, `state.firstScore = null`을 정하고 `startRound(...)`
   - 결과 화면의 "순위표에 기록되지 않음"은 `!MODES[state.mode].leaderboard`일 때만 보여 줌
 
-- [ ] Step 1: `runSelfTests()`에 점검 2개를 더함
+- [x] Step 1: `runSelfTests()`에 점검 2개를 더함
 
 ```js
 check("스피드 모드 규칙(PRD 5.1항)", () =>
@@ -248,10 +248,10 @@ check("힌트 모드 규칙(PRD 5.1항)", () =>
   MODES.hint.leaderboard === true && MODES.hint.retry === false);
 ```
 
-- [ ] Step 2: `node script.js`. 기대 출력: 끝 줄 `점검 실패: 2개`
-- [ ] Step 3: 시작 화면에서 "순위표에 기록되지 않음"을 지우고, 위 내용을 씀(PRD 8.2항)
-- [ ] Step 4: `node script.js`. 기대 출력: 끝 줄 `점검 통과: 7개`
-- [ ] Step 5: `index.html`, `script.js`를 커밋함
+- [x] Step 2: `node script.js`. 기대 출력: 끝 줄 `점검 실패: 2개`
+- [x] Step 3: 시작 화면에서 "순위표에 기록되지 않음"을 지우고, 위 내용을 씀(PRD 8.2항)
+- [x] Step 4: `node script.js`. 기대 출력: 끝 줄 `점검 통과: 7개`
+- [x] Step 5: `index.html`, `script.js`를 커밋함
 
 ### Task 6: 스피드 모드
 
@@ -266,9 +266,9 @@ check("힌트 모드 규칙(PRD 5.1항)", () =>
   - `onTimeout() -> void`: `state.answered`면 아무것도 하지 않음. 현재 문항을 `state.wrong`에 넣고 `revealAnswer(null)`
   - `renderQuestion()`은 `timeLimit > 0`이면 `startTimer()`, `revealAnswer()`는 항상 `stopTimer()`, [처음으로]도 `stopTimer()`
 
-- [ ] Step 1: 위 내용을 씀(PRD 5.3항). 타이머는 화면과 시간에 묶여 점검 함수로 보지 않고 Task 9의 2-2~2-4 항목으로 봄
-- [ ] Step 2: `node script.js`. 기대 출력: 끝 줄 `점검 통과: 7개`
-- [ ] Step 3: `script.js`, `index.html`을 커밋함
+- [x] Step 1: 위 내용을 씀(PRD 5.3항). 타이머는 화면과 시간에 묶여 점검 함수로 보지 않고 Task 9의 2-2~2-4 항목으로 봄
+- [x] Step 2: `node script.js`. 기대 출력: 끝 줄 `점검 통과: 7개`
+- [x] Step 3: `script.js`, `index.html`을 커밋함
 
 ### Task 7: 힌트 모드
 
@@ -282,7 +282,7 @@ check("힌트 모드 규칙(PRD 5.1항)", () =>
   - `useHint() -> void`: `state.answered`나 `state.hintUsed`면 아무것도 하지 않음. `pickHintChoices()`가 고른 보기 2개를 `disabled`, `state.hintUsed = true`, [힌트]를 `disabled`
   - `revealAnswer()`는 [힌트]도 `disabled`로 바꿈
 
-- [ ] Step 1: `runSelfTests()`에 점검 3개를 더함
+- [x] Step 1: `runSelfTests()`에 점검 3개를 더함
 
 ```js
 check("채점: 힌트를 쓰고 맞히면 0.5점", () => scoreFor(true, true, "hint") === 0.5);
@@ -294,10 +294,10 @@ check("힌트: 정답을 빼고 서로 다른 오답 2개", () => {
 });
 ```
 
-- [ ] Step 2: `node script.js`. 기대 출력: `pickHintChoices` 점검 1개가 FAIL, 끝 줄 `점검 실패: 1개`(채점 점검 2개는 Task 3의 `scoreFor()`와 Task 5의 규칙표로 이미 통과함)
-- [ ] Step 3: 위 내용을 씀(PRD 5.4항)
-- [ ] Step 4: `node script.js`. 기대 출력: 끝 줄 `점검 통과: 10개`
-- [ ] Step 5: `script.js`, `index.html`을 커밋함
+- [x] Step 2: `node script.js`. 기대 출력: `pickHintChoices` 점검 1개가 FAIL, 끝 줄 `점검 실패: 1개`(채점 점검 2개는 Task 3의 `scoreFor()`와 Task 5의 규칙표로 이미 통과함)
+- [x] Step 3: 위 내용을 씀(PRD 5.4항)
+- [x] Step 4: `node script.js`. 기대 출력: 끝 줄 `점검 통과: 10개`
+- [x] Step 5: `script.js`, `index.html`을 커밋함
 
 ### Task 8: 틀린 문제 다시 풀기
 
@@ -310,13 +310,13 @@ check("힌트: 정답을 빼고 서로 다른 오답 2개", () => {
   - `retryWrong() -> void`: `state.firstScore`가 `null`일 때만 `{ score: state.score, total: state.questions.length }`로 정함(검토 초점 5). 이어서 `startRound(state.wrong)`
   - `showResult()`: `state.firstScore`가 있으면 "처음 판 `formatScore(firstScore.score, firstScore.total)`"와 "다시 푼 점수 `formatScore(score, questions.length)`"를 함께 보여 줌
 
-- [ ] Step 1: 위 내용을 씀(PRD 5.5항, 4.2항). 다시 풀기는 화면 상태에 묶여 점검 함수로 보지 않고 Task 9의 2-7, 2-8 항목으로 봄
-- [ ] Step 2: `node script.js`. 기대 출력: 끝 줄 `점검 통과: 10개`
-- [ ] Step 3: `script.js`, `index.html`을 커밋함
+- [x] Step 1: 위 내용을 씀(PRD 5.5항, 4.2항). 다시 풀기는 화면 상태에 묶여 점검 함수로 보지 않고 Task 9의 2-7, 2-8 항목으로 봄
+- [x] Step 2: `node script.js`. 기대 출력: 끝 줄 `점검 통과: 10개`
+- [x] Step 3: `script.js`, `index.html`을 커밋함
 
 ### Task 9: 2단계 사용자 확인
 
-- [ ] Step 1: 아래 항목을 사용자에게 드리고 답을 기다림
+- [x] Step 1: 아래 항목을 사용자에게 드리고 답을 기다림
 
 | 번호 | 확인할 것(PRD 8.2항과 검토 초점) |
 |---|---|
@@ -330,7 +330,7 @@ check("힌트: 정답을 빼고 서로 다른 오답 2개", () => {
 | 2-7 | 연습: 다시 풀기에 틀린 문항만 나옴. 또 틀리면 다시 풀기를 반복할 수 있고, 반복해도 "처음 판" 점수가 그대로임(검토 초점 5) |
 | 2-8 | 스피드, 힌트 모드의 결과 화면에는 [틀린 문제 다시 풀기]가 없음 |
 
-- [ ] Step 2: 지적한 항목을 고치고 그 항목만 다시 확인을 요청함. 고친 파일을 커밋함. 모두 통과하면 3단계로 넘어감
+- [x] Step 2: 지적한 항목을 고치고 그 항목만 다시 확인을 요청함. 고친 파일을 커밋함. 모두 통과하면 3단계로 넘어감
 
 ---
 
