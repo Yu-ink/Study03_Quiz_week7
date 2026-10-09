@@ -2,6 +2,8 @@
 
 const MODES = {
   practice: { name: "연습", timeLimit: 0, hintCount: 0, hintScore: null, leaderboard: false, retry: true },
+  speed: { name: "스피드", timeLimit: 15, hintCount: 0, hintScore: null, leaderboard: true, retry: false },
+  hint:  { name: "힌트",   timeLimit: 0,  hintCount: 1, hintScore: 0.5,  leaderboard: true, retry: false },
 };
 
 const state = {
@@ -36,9 +38,14 @@ function formatScore(score, total) {
 
 function startCategory(category) {
   state.category = category;
-  state.mode = "practice";
+  document.getElementById("mode-category").textContent = category;
+  showScreen("mode");
+}
+
+function startMode(mode) {
+  state.mode = mode;
   state.firstScore = null;
-  startRound(QUESTIONS.filter(q => q.category === category));
+  startRound(QUESTIONS.filter(q => q.category === state.category));
 }
 
 function startRound(list) {
@@ -66,6 +73,49 @@ function renderQuestion() {
     list.appendChild(button);
   }
   document.getElementById("feedback").hidden = true;
+  document.getElementById("timer").hidden = MODES[state.mode].timeLimit === 0;
+  const hintButton = document.getElementById("hint-button");
+  hintButton.hidden = MODES[state.mode].hintCount === 0;
+  hintButton.disabled = false;
+  if (MODES[state.mode].timeLimit > 0) startTimer();
+}
+
+function startTimer() {
+  stopTimer();
+  state.secondsLeft = MODES[state.mode].timeLimit;
+  const timer = document.getElementById("timer");
+  timer.textContent = `${state.secondsLeft}초`;
+  state.timerId = setInterval(() => {
+    state.secondsLeft--;
+    timer.textContent = `${state.secondsLeft}초`;
+    if (state.secondsLeft <= 0) onTimeout();
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(state.timerId);
+  state.timerId = null;
+}
+
+function onTimeout() {
+  if (state.answered) return;
+  state.wrong.push(state.questions[state.index]);
+  revealAnswer(null);
+}
+
+function pickHintChoices(choices, answer) {
+  return shuffle(choices.filter(c => c !== answer)).slice(0, 2);
+}
+
+function useHint() {
+  if (state.answered || state.hintUsed) return;
+  const q = state.questions[state.index];
+  const picked = pickHintChoices(q.choices, q.answer);
+  for (const button of document.getElementById("choice-list").children) {
+    if (picked.includes(button.textContent)) button.disabled = true;
+  }
+  state.hintUsed = true;
+  document.getElementById("hint-button").disabled = true;
 }
 
 function selectChoice(choice) {
@@ -80,6 +130,8 @@ function selectChoice(choice) {
 function revealAnswer(selected) {
   const q = state.questions[state.index];
   state.answered = true;
+  stopTimer();
+  document.getElementById("hint-button").disabled = true;
   for (const button of document.getElementById("choice-list").children) {
     button.disabled = true;
     if (button.textContent === q.answer) button.classList.add("correct");
@@ -102,19 +154,44 @@ function nextQuestion() {
 }
 
 function showResult() {
-  document.getElementById("result-score").textContent = formatScore(state.score, state.questions.length);
+  const score = formatScore(state.score, state.questions.length);
+  const first = document.getElementById("result-first");
+  first.hidden = state.firstScore === null;
+  if (state.firstScore === null) {
+    document.getElementById("result-score").textContent = score;
+  } else {
+    first.textContent = `처음 판 ${formatScore(state.firstScore.score, state.firstScore.total)}`;
+    document.getElementById("result-score").textContent = `다시 푼 점수 ${score}`;
+  }
+  document.getElementById("result-note").hidden = MODES[state.mode].leaderboard;
+  document.getElementById("retry-button").hidden = !(MODES[state.mode].retry && state.wrong.length > 0);
   showScreen("result");
+}
+
+function retryWrong() {
+  if (state.firstScore === null) {
+    state.firstScore = { score: state.score, total: state.questions.length };
+  }
+  startRound(state.wrong);
 }
 
 function init() {
   document.querySelectorAll("[data-category]").forEach(button => {
     button.addEventListener("click", () => startCategory(button.dataset.category));
   });
+  document.querySelectorAll("[data-mode]").forEach(button => {
+    button.addEventListener("click", () => startMode(button.dataset.mode));
+  });
+  document.getElementById("hint-button").addEventListener("click", useHint);
   document.getElementById("next-button").addEventListener("click", () => {
     if (state.index === state.questions.length - 1) showResult();
     else nextQuestion();
   });
-  document.getElementById("home-button").addEventListener("click", () => showScreen("start"));
+  document.getElementById("retry-button").addEventListener("click", retryWrong);
+  document.getElementById("home-button").addEventListener("click", () => {
+    stopTimer();
+    showScreen("start");
+  });
   showScreen("start");
 }
 
@@ -136,6 +213,19 @@ function runSelfTests() {
   check("formatScore", () => formatScore(7.5, 10) === "7.5/10" && formatScore(3, 4) === "3/4");
   check("채점: 연습 모드에서 맞히면 1점", () => scoreFor(true, false, "practice") === 1);
   check("채점: 틀리면 0점", () => scoreFor(false, false, "practice") === 0);
+  check("스피드 모드 규칙(PRD 5.1항)", () =>
+    MODES.speed.timeLimit === 15 && MODES.speed.hintCount === 0 &&
+    MODES.speed.leaderboard === true && MODES.speed.retry === false);
+  check("힌트 모드 규칙(PRD 5.1항)", () =>
+    MODES.hint.timeLimit === 0 && MODES.hint.hintCount === 1 && MODES.hint.hintScore === 0.5 &&
+    MODES.hint.leaderboard === true && MODES.hint.retry === false);
+  check("채점: 힌트를 쓰고 맞히면 0.5점", () => scoreFor(true, true, "hint") === 0.5);
+  check("채점: 힌트를 쓰고 틀리면 0점", () => scoreFor(false, true, "hint") === 0);
+  check("힌트: 정답을 빼고 서로 다른 오답 2개", () => {
+    const picked = pickHintChoices(["가", "나", "다", "라"], "나");
+    return picked.length === 2 && !picked.includes("나") && new Set(picked).size === 2 &&
+      picked.every(c => ["가", "다", "라"].includes(c));
+  });
   // 태스크마다 여기에 check(...)를 더함
   const failed = results.filter(ok => !ok).length;
   console.log(failed ? `점검 실패: ${failed}개` : `점검 통과: ${results.length}개`);

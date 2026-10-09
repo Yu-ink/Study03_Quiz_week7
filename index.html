@@ -18,16 +18,27 @@
         <button data-category="과학">과학</button>
         <button data-category="예술과 문화">예술과 문화</button>
       </div>
-      <p class="note">순위표에 기록되지 않음</p>
+    </section>
+
+    <section id="screen-mode" hidden>
+      <h2 id="mode-category"></h2>
+      <p>모드를 고르세요.</p>
+      <div>
+        <button data-mode="practice">연습<br><span class="note">순위표에 기록되지 않음</span></button>
+        <button data-mode="speed">스피드</button>
+        <button data-mode="hint">힌트</button>
+      </div>
     </section>
 
     <section id="screen-question" hidden>
       <div class="status">
         <span id="progress"></span>
+        <span id="timer"></span>
         <span id="current-score"></span>
       </div>
       <p id="question-text"></p>
       <div id="choice-list" class="choice-list"></div>
+      <button id="hint-button">힌트</button>
       <div id="feedback" hidden>
         <p id="feedback-result"></p>
         <p id="feedback-explanation"></p>
@@ -38,8 +49,10 @@
 
     <section id="screen-result" hidden>
       <h2>결과</h2>
+      <p id="result-first" hidden></p>
       <p id="result-score" class="result-score"></p>
-      <p class="note">순위표에 기록되지 않음</p>
+      <p id="result-note" class="note">순위표에 기록되지 않음</p>
+      <button id="retry-button">틀린 문제 다시 풀기</button>
       <button id="home-button">처음으로</button>
     </section>
   </main>
