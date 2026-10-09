@@ -74,6 +74,9 @@ function renderQuestion() {
   }
   document.getElementById("feedback").hidden = true;
   document.getElementById("timer").hidden = MODES[state.mode].timeLimit === 0;
+  const hintButton = document.getElementById("hint-button");
+  hintButton.hidden = MODES[state.mode].hintCount === 0;
+  hintButton.disabled = false;
   if (MODES[state.mode].timeLimit > 0) startTimer();
 }
 
@@ -100,6 +103,21 @@ function onTimeout() {
   revealAnswer(null);
 }
 
+function pickHintChoices(choices, answer) {
+  return shuffle(choices.filter(c => c !== answer)).slice(0, 2);
+}
+
+function useHint() {
+  if (state.answered || state.hintUsed) return;
+  const q = state.questions[state.index];
+  const picked = pickHintChoices(q.choices, q.answer);
+  for (const button of document.getElementById("choice-list").children) {
+    if (picked.includes(button.textContent)) button.disabled = true;
+  }
+  state.hintUsed = true;
+  document.getElementById("hint-button").disabled = true;
+}
+
 function selectChoice(choice) {
   if (state.answered) return;
   const q = state.questions[state.index];
@@ -113,6 +131,7 @@ function revealAnswer(selected) {
   const q = state.questions[state.index];
   state.answered = true;
   stopTimer();
+  document.getElementById("hint-button").disabled = true;
   for (const button of document.getElementById("choice-list").children) {
     button.disabled = true;
     if (button.textContent === q.answer) button.classList.add("correct");
@@ -147,6 +166,7 @@ function init() {
   document.querySelectorAll("[data-mode]").forEach(button => {
     button.addEventListener("click", () => startMode(button.dataset.mode));
   });
+  document.getElementById("hint-button").addEventListener("click", useHint);
   document.getElementById("next-button").addEventListener("click", () => {
     if (state.index === state.questions.length - 1) showResult();
     else nextQuestion();
@@ -182,6 +202,13 @@ function runSelfTests() {
   check("힌트 모드 규칙(PRD 5.1항)", () =>
     MODES.hint.timeLimit === 0 && MODES.hint.hintCount === 1 && MODES.hint.hintScore === 0.5 &&
     MODES.hint.leaderboard === true && MODES.hint.retry === false);
+  check("채점: 힌트를 쓰고 맞히면 0.5점", () => scoreFor(true, true, "hint") === 0.5);
+  check("채점: 힌트를 쓰고 틀리면 0점", () => scoreFor(false, true, "hint") === 0);
+  check("힌트: 정답을 빼고 서로 다른 오답 2개", () => {
+    const picked = pickHintChoices(["가", "나", "다", "라"], "나");
+    return picked.length === 2 && !picked.includes("나") && new Set(picked).size === 2 &&
+      picked.every(c => ["가", "다", "라"].includes(c));
+  });
   // 태스크마다 여기에 check(...)를 더함
   const failed = results.filter(ok => !ok).length;
   console.log(failed ? `점검 실패: ${failed}개` : `점검 통과: ${results.length}개`);
