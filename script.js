@@ -201,6 +201,41 @@ function recordScore(mode, category, score, date = todayString()) {
   return { saved: true, rank };
 }
 
+function renderLeaderboard() {
+  const board = loadLeaderboard();
+  const container = document.getElementById("leaderboard-tables");
+  container.replaceChildren();
+  for (const mode of ["speed", "hint"]) {
+    for (const category of CATEGORIES) {
+      const title = document.createElement("h3");
+      title.textContent = `${MODES[mode].name} ${category}`;
+      container.appendChild(title);
+      const list = board[`${mode}|${category}`];
+      if (!Array.isArray(list) || list.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "note";
+        empty.textContent = "기록 없음";
+        container.appendChild(empty);
+        continue;
+      }
+      const table = document.createElement("table");
+      const head = table.insertRow();
+      for (const label of ["순위", "날짜", "점수"]) {
+        const th = document.createElement("th");
+        th.textContent = label;
+        head.appendChild(th);
+      }
+      list.forEach((entry, i) => {
+        const row = table.insertRow();
+        for (const value of [`${i + 1}`, entry.date, formatScore(entry.score, 10)]) {
+          row.insertCell().textContent = value;
+        }
+      });
+      container.appendChild(table);
+    }
+  }
+}
+
 function showResult() {
   const score = formatScore(state.score, state.questions.length);
   const first = document.getElementById("result-first");
@@ -248,6 +283,11 @@ function init() {
     stopTimer();
     showScreen("start");
   });
+  document.getElementById("leaderboard-button").addEventListener("click", () => {
+    renderLeaderboard();
+    showScreen("leaderboard");
+  });
+  document.getElementById("leaderboard-home-button").addEventListener("click", () => showScreen("start"));
   showScreen("start");
 }
 
