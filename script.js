@@ -147,6 +147,8 @@ function revealAnswer(selected) {
   }
   let result = selected === q.answer ? "정답" : "오답";
   if (selected === null) result = "시간 초과";
+  document.getElementById("feedback").dataset.result =
+    selected === null ? "timeout" : selected === q.answer ? "correct" : "wrong";   // style.css의 색 구분
   document.getElementById("feedback-result").textContent = result;
   document.getElementById("feedback-explanation").textContent = q.explanation;
   document.getElementById("feedback-source").textContent = `출처: ${q.source}`;
