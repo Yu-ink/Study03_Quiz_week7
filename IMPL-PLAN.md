@@ -13,7 +13,7 @@
 
 | 구현 단계 | 만들 것 | 완료 기준 | 태스크 |
 |---|---|---|---|
-| 1단계 | 파일 4개, 40문항, 시작 화면, 문제 화면, 결과 화면, 연습 모드 채점, 섞기, 점검 함수 | Node 문항 검사 통과, `node script.js` 점검 통과, 사용자의 브라우저 확인 7개 항목(`index.html?test` 콘솔 포함)과 40문항 확인 | 1~4 |
+| 1단계 | 파일 4개, 카테고리마다 같은 수의 문항, 시작 화면, 문제 화면, 결과 화면, 연습 모드 채점, 섞기, 점검 함수 | Node 문항 검사 통과, `node script.js` 점검 통과, 사용자의 브라우저 확인 7개 항목(`index.html?test` 콘솔 포함)과 전체 문항 확인 | 1~4 |
 | 2단계 | 모드 선택 화면, 스피드 모드, 힌트 모드, 틀린 문제 다시 풀기 | `node script.js` 점검 통과, 사용자의 브라우저 확인 9개 항목(`index.html?test` 콘솔 포함) | 5~9 |
 | 3단계 | localStorage 저장, 결과 화면의 순위, 순위표 화면 | `node script.js` 점검 통과, 사용자의 브라우저 확인 9개 항목(`index.html?test` 콘솔 포함, 크롬, 사파리) | 10~12 |
 
@@ -30,7 +30,8 @@
 - 태스크마다 마지막에 그 태스크에서 바꾼 파일을 커밋함. 메시지는 `feat: Task N <태스크 제목>`(git 저장소는 2026-10-09에 만듦, 아직 커밋 없음)
 - 화면 문구는 PRD 4.2항의 문구를 그대로 씀: "순위표에 기록되지 않음", "상위 10위 밖", "순위표를 저장할 수 없음", [처음으로], [다음], [결과 보기], [힌트], [틀린 문제 다시 풀기], [순위표]
 - 문항, 보기, 해설을 화면에 넣을 때 `textContent`를 씀(문항에 `<`, `&`가 들어가도 그대로 보이게 함)
-- 점수 표기는 `점수/문항 수`(예: `7.5/10`, 다시 푼 판은 `3/4`)
+- 카테고리마다 문항 수가 같음. 한 판은 고른 카테고리의 문항 전부임(PRD 6.2항). 코드에 문항 수 10을 고정해 쓰지 않음
+- 점수 표기는 `점수/문항 수`(예: 한 판이 10문항이면 `7.5/10`, 다시 푼 판은 `3/4`)
 
 ## 검토 초점
 
@@ -46,7 +47,7 @@ PRD가 말하지 않았으나 사용자가 겪기 쉬운 경우 5개. 각 줄의
 
 | 파일 | 맡는 일 | 만드는 태스크 |
 |---|---|---|
-| questions.js | 전역 `QUESTIONS` 배열, 40문항 | 1 |
+| questions.js | 전역 `QUESTIONS` 배열, 카테고리마다 같은 수의 문항 | 1 |
 | index.html | 화면별 `<section id="screen-…">`, 버튼 마크업. questions.js, script.js 순으로 읽음 | 2 |
 | style.css | 배치, 정답 보기와 고른 오답 보기의 색 | 2 |
 | script.js | `MODES`, `state`, 화면 전환, 채점, 타이머, 힌트, 다시 풀기, 순위표, 점검 함수 | 2 |
@@ -61,7 +62,7 @@ PRD가 말하지 않았으나 사용자가 겪기 쉬운 경우 5개. 각 줄의
 
 인터페이스
 - 내놓는 것: `const QUESTIONS = [{ id, category, question, choices, answer, explanation, source }]`(PRD 6.1항 형식)
-- id 약자: 한국사 `kh`, 세계지리 `wg`, 과학 `sc`, 예술과 문화 `ac`. 번호는 `01`~`10`
+- id 약자: 한국사 `kh`, 세계지리 `wg`, 과학 `sc`, 예술과 문화 `ac`. 번호는 `01`부터 두 자리
 
 - [x] Step 1: 한국사 10문항(`kh-01`~`kh-10`)을 씀
   - 문항마다 웹 자료로 정답을 대조함. 자료는 공공기관, 백과사전(예: 우리역사넷, 한국민족문화대백과사전)을 우선함
@@ -80,18 +81,17 @@ const ctx = {};
 vm.runInNewContext(fs.readFileSync("questions.js", "utf8") + "\nthis.Q = QUESTIONS;", ctx);
 const cats = ["한국사", "세계지리", "과학", "예술과 문화"];
 const errs = [];
-for (const c of cats) {
-  const n = ctx.Q.filter(q => q.category === c).length;
-  if (n !== 10) errs.push(`${c}: ${n}문항`);
+const counts = cats.map(c => ctx.Q.filter(q => q.category === c).length);
+if (counts[0] === 0 || counts.some(n => n !== counts[0])) {
+  errs.push(`카테고리마다 문항 수가 같지 않음: ${cats.map((c, i) => `${c} ${counts[i]}`).join(", ")}`);
 }
-if (ctx.Q.length !== 40) errs.push(`전체: ${ctx.Q.length}문항`);
 for (const q of ctx.Q) {
   if (!cats.includes(q.category)) errs.push(`${q.id}: 카테고리 ${q.category}`);
   if (q.choices.length !== 4 || new Set(q.choices).size !== 4) errs.push(`${q.id}: 보기 4개가 서로 다르지 않음`);
   if (q.choices.filter(c => c === q.answer).length !== 1) errs.push(`${q.id}: 정답이 보기에 정확히 1번 나오지 않음`);
   if (!q.explanation?.trim() || !q.source?.trim()) errs.push(`${q.id}: 해설 또는 출처가 비어 있음`);
 }
-console.log(errs.length ? errs.join("\n") : "문항 검사 통과: 40문항");
+console.log(errs.length ? errs.join("\n") : `문항 검사 통과: ${ctx.Q.length}문항`);
 process.exitCode = errs.length ? 1 : 0;
 EOF
 ```
@@ -175,7 +175,7 @@ if (typeof document === "undefined") {
   - `formatScore(score: number, total: number) -> string`: `` `${score}/${total}` ``
   - `startCategory(category: string) -> void`: 1단계에서는 `state.category`, `state.mode = "practice"`, `state.firstScore = null`을 정하고 `startRound(QUESTIONS.filter(...))`
   - `startRound(list: Array<Question>) -> void`: `state.questions = shuffle(list).map(q => ({ ...q, choices: shuffle(q.choices) }))`, `index`, `score`, `wrong`을 초기화하고 `renderQuestion()`
-  - `renderQuestion() -> void`: 진행(`3/10`), 현재 점수, 문항, 보기 4개를 그림. `state.answered = false`, `state.hintUsed = false`
+  - `renderQuestion() -> void`: 진행(예: 한 판이 10문항이면 `3/10`), 현재 점수, 문항, 보기 4개를 그림. `state.answered = false`, `state.hintUsed = false`
   - `selectChoice(choice: string) -> void`: `state.answered`면 아무것도 하지 않음. 보기 내용을 `answer`와 비교해 `scoreFor()`로 채점하고, 틀리면 `state.wrong`에 넣음. 이어서 `revealAnswer(choice)`
   - `revealAnswer(selected: string | null) -> void`: `state.answered = true`, 보기를 모두 잠금, 정답 보기에 `correct`, 고른 오답 보기에 `wrong`, 정답 여부(시간 초과면 `selected === null`), 해설, 출처, 마지막 문항이면 [결과 보기] 아니면 [다음]
   - `nextQuestion() -> void`, `showResult() -> void`
@@ -425,7 +425,7 @@ PRD의 항목마다 그것을 구현하거나 확인하는 태스크를 적음. 
 | PRD 3절 | file://로 열어 동작, questions.js를 `<script>`로 읽음 | 2 | 1-1 |
 | PRD 3절 | 화면마다 `<section>`, 보이기와 숨기기 | 2 | 1-1 |
 | PRD 3절 | 상태 객체 1개, 모드 규칙표 1개 | 2, 5 | 1-0, 2-0 |
-| PRD 4.1항 | 구현 1단계 흐름: 시작, 문제 ×10, 결과, [처음으로] | 3 | 1-1 |
+| PRD 4.1항 | 구현 1단계 흐름: 시작, 문제 ×N(카테고리의 문항 수), 결과, [처음으로] | 3 | 1-1 |
 | PRD 4.1항 | 구현 2단계 흐름: 모드 선택, 다시 풀기 | 5, 8 | 2-1, 2-7 |
 | PRD 4.1항 | 구현 3단계 흐름: 시작 화면의 [순위표] | 11 | 3-1 |
 | PRD 4.2항 | 시작 화면: 카테고리 버튼 4개, 문구, [순위표] | 2, 5, 11 | 1-4, 2-1, 3-1 |
@@ -437,7 +437,7 @@ PRD의 항목마다 그것을 구현하거나 확인하는 태스크를 적음. 
 | PRD 4.2항 | 결과 화면(스피드, 힌트): 순위, "상위 10위 밖" | 10 | 3-1, 3-3 |
 | PRD 4.2항 | 순위표 화면: 표 8개, 상위 10개 | 11 | 3-1, 3-3 |
 | PRD 5.1항 | 모드 규칙표 3줄 | 2, 5 | 1-0, 2-0 |
-| PRD 5.2항 | 맞히면 1점, 틀리면 0점, 힌트를 쓰고 맞히면 0.5점, 10점 만점 표기 | 3, 7 | 1-0, 1-2, 2-0, 2-6 |
+| PRD 5.2항 | 맞히면 1점, 틀리면 0점, 힌트를 쓰고 맞히면 0.5점, `점수/한 판의 문항 수` 표기 | 3, 7 | 1-0, 1-2, 2-0, 2-6 |
 | PRD 5.2항 | 문항 순서와 보기 순서 섞기, 보기 내용으로 채점 | 3 | 1-0, 1-5 |
 | PRD 5.3항 | 스피드 모드: 15초, 시간 초과는 오답, 해설 중 정지, [다음]에서 다시 셈 | 6 | 2-2, 2-3, 2-4 |
 | PRD 5.4항 | 힌트 모드: 오답 보기 2개를 막음, 1번만 씀 | 7 | 2-0, 2-5, 2-6 |

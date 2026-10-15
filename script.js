@@ -45,6 +45,11 @@ function startCategory(category) {
   showScreen("mode");
 }
 
+// 한 판은 고른 카테고리의 문항 전부. 카테고리마다 문항 수가 같음(PRD 6.2항)
+function roundSize(questions, category) {
+  return questions.filter(q => q.category === category).length;
+}
+
 function startMode(mode) {
   state.mode = mode;
   state.firstScore = null;
@@ -227,7 +232,7 @@ function renderLeaderboard() {
       }
       list.forEach((entry, i) => {
         const row = table.insertRow();
-        for (const value of [`${i + 1}`, entry.date, formatScore(entry.score, 10)]) {
+        for (const value of [`${i + 1}`, entry.date, formatScore(entry.score, roundSize(QUESTIONS, category))]) {
           row.insertCell().textContent = value;
         }
       });
@@ -340,6 +345,10 @@ function runSelfTests() {
     const full = Array.from({ length: 10 }, () => ({ date: "2026-10-09", score: 9 }));
     const r = insertScore(full, { date: "2026-10-09", score: 3 });
     return r.rank === null && r.list.length === 10;
+  });
+  check("한 판 크기: 고른 카테고리의 문항 수(10개로 고정하지 않음)", () => {
+    const qs = [...Array(12).fill({ category: "과학" }), ...Array(12).fill({ category: "한국사" })];
+    return roundSize(qs, "과학") === 12 && roundSize(qs, "세계지리") === 0;
   });
   // 태스크마다 여기에 check(...)를 더함
   const failed = results.filter(ok => !ok).length;
